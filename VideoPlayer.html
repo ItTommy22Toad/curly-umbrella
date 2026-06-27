@@ -2,313 +2,347 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Windows 98 Media Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 98 Media Player - Fullscreen</title>
     <style>
-        /* Transparent body background and flex centering */
+        /* Windows 98 Fullscreen Styling */
         body {
-            background-color: transparent; 
-            font-family: "MS Sans Serif", Arial, sans-serif;
-            font-size: 11px;
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            background-color: #c0c0c0;
+            font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
+            font-size: 12px;
+            overflow: hidden; /* Prevents page scrolling */
         }
 
-        /* Resizable Main Window Container */
-        .player-window {
+        .win98-window {
+            background-color: #c0c0c0;
             width: 100%;
-            max-width: 600px;
-            min-width: 320px;
-            background-color: #d4d0c8;
-            border-top: 2px solid #fff;
-            border-left: 2px solid #fff;
-            border-right: 2px solid #404040;
-            border-bottom: 2px solid #404040;
-            box-shadow: 1px 1px 0px 0px #000;
-            padding: 2px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
             box-sizing: border-box;
-            resize: both;
-            overflow: auto; 
+            padding: 4px;
+            border: 2px solid;
+            border-color: #dfdfdf #000000 #000000 #dfdfdf;
         }
 
-        /* Menu Bar ([File], etc.) */
+        /* Menu Bar */
         .menu-bar {
             display: flex;
-            gap: 10px;
-            padding: 4px 6px;
-            font-size: 11px;
-        }
-        .menu-item {
-            position: relative;
-            cursor: pointer;
-            user-select: none;
-        }
-        .menu-item::first-letter {
-            text-decoration: underline;
-        }
-        .dropdown {
-            display: none;
-            position: absolute;
-            top: 15px;
-            left: 0;
-            background-color: #d4d0c8;
-            border: 1px solid #404040;
-            box-shadow: 2px 2px 0px #000;
-            z-index: 10;
-            min-width: 100px;
-        }
-        .menu-item:hover .dropdown {
-            display: block;
-        }
-        .dropdown-item {
-            padding: 4px 10px;
-        }
-        .dropdown-item:hover {
-            background-color: #000080;
-            color: #fff;
-        }
-        
-        /* Subtle divider line for menu options */
-        .dropdown-divider {
-            height: 1px;
-            background-color: #808080;
-            border-bottom: 1px solid #fff;
-            margin: 4px 2px;
+            padding: 2px 4px;
+            margin-bottom: 4px;
+            align-items: center;
         }
 
-        /* Video Display Box adapts to window size */
-        .video-display {
-            background-color: #000;
-            width: 100%;
-            height: 300px;
-            border-top: 2px solid #404040;
-            border-left: 2px solid #404040;
-            border-right: 2px solid #fff;
-            border-bottom: 2px solid #fff;
+        .menu-item {
+            padding: 2px 6px;
+            cursor: default;
+            border: 1px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: #000080;
+            color: #ffffff;
+        }
+
+        .upload-hint {
+            margin-left: 10px;
+            color: #000080;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        /* Media Screen */
+        .screen-container {
+            background-color: #000000;
+            flex-grow: 1; /* Makes the screen fill all available vertical space */
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            margin: 0 4px;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
+
         video {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            background-color: #000;
-        }
-
-        /* Trackbar/Slider Section */
-        .trackbar-container {
-            padding: 8px 6px;
-        }
-        .trackbar {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-            margin: 0;
-        }
-        .trackbar:focus {
             outline: none;
         }
-        .trackbar::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: #808080;
-            border-bottom: 1px solid #fff;
-            border-right: 1px solid #fff;
-        }
-        .trackbar::-webkit-slider-thumb {
-            height: 18px;
-            width: 10px;
-            background: #d4d0c8;
-            border-top: 1px solid #fff;
-            border-left: 1px solid #fff;
-            border-right: 1px solid #404040;
-            border-bottom: 1px solid #404040;
-            box-shadow: 1px 1px 0 #000;
-            cursor: pointer;
-            -webkit-appearance: none;
-            margin-top: -7px;
+
+        .audio-message {
+            position: absolute;
+            color: #ffffff;
+            font-family: 'MS Sans Serif', Tahoma, sans-serif;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+            display: none;
+            line-height: 1.5;
         }
 
-        /* Lower Control Panel */
-        .control-panel {
+        /* Controls Section */
+        .controls-container {
+            padding: 10px 4px 4px 4px;
+        }
+
+        /* Sliders */
+        .progress-wrapper {
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 20px;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 12px;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #dfdfdf #000000 #000000 #dfdfdf;
+            margin-top: -4px;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            width: 100%;
+        }
+
+        .vol-slider {
+            width: 80px;
+            margin-left: 4px;
+        }
+
+        /* Buttons and Time Display */
+        .bottom-controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 4px 6px 8px 6px;
+            padding: 0 4px;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .button-group {
+        .buttons {
             display: flex;
             gap: 2px;
+            align-items: center;
         }
 
-        /* Classic Win98 Button Style */
-        .win-btn {
-            font-family: "MS Sans Serif", Arial, sans-serif;
-            font-size: 11px;
-            background-color: #d4d0c8;
-            border-top: 1px solid #fff;
-            border-left: 1px solid #fff;
-            border-right: 1px solid #404040;
-            border-bottom: 1px solid #404040;
-            box-shadow: 1px 1px 0px 0px #000;
-            padding: 4px 6px;
+        button, select {
+            background-color: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
             cursor: pointer;
-            min-width: 28px;
-            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            user-select: none;
-        }
-        .win-btn:active {
-            border-top: 1px solid #404040;
-            border-left: 1px solid #404040;
-            border-right: 1px solid #fff;
-            border-bottom: 1px solid #fff;
-            box-shadow: none;
-            padding: 5px 5px 3px 7px;
+            color: #000;
         }
 
-        /* Information / Time Display Box */
-        .status-display {
-            background-color: #d4d0c8;
-            border-top: 1px solid #404040;
-            border-left: 1px solid #404040;
-            border-right: 1px solid #fff;
-            border-bottom: 1px solid #fff;
-            padding: 3px 6px;
-            min-width: 100px;
-            text-align: right;
+        select {
+            padding: 2px 4px;
+            margin: 0 4px;
+        }
+
+        button:active {
+            border-color: #000000 #ffffff #ffffff #000000;
+            padding: 5px 9px 3px 11px;
+        }
+
+        .time-display {
+            border: 2px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 4px 8px;
+            background-color: #c0c0c0;
             font-family: monospace;
-            font-size: 11px;
-        }
-
-        #file-upload {
-            display: none;
+            font-size: 12px;
+            min-width: 90px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-<div class="player-window">
-    <!-- Menu Bar -->
-    <div class="menu-bar">
-        <div class="menu-item">
-            File
-            <div class="dropdown">
-                <div class="dropdown-item" onclick="triggerUpload()">Open File...</div>
-                <div class="dropdown-divider"></div>
-                <div class="dropdown-item" onclick="exitPlayer()">Exit</div>
+    <div class="win98-window">
+        <div class="menu-bar">
+            <div class="menu-item" id="fileMenuBtn"><u>F</u>ile</div>
+            <span class="upload-hint">&lt;-- upload a video to play</span>
+            <input type="file" id="fileInput" accept="video/*, audio/*" style="display: none;">
+        </div>
+
+        <div class="screen-container">
+            <video id="mediaPlayer" src=""></video>
+            <div class="audio-message" id="audioMessage">
+                This is an audio file, audio files won't play video unless audio file have an art cover
+            </div>
+        </div>
+
+        <div class="controls-container">
+            <div class="progress-wrapper">
+                <input type="range" id="progressBar" class="progress-bar" value="0" min="0" step="0.1">
+            </div>
+            
+            <div class="bottom-controls">
+                <div class="buttons">
+                    <button id="playBtn" title="Play">▶</button>
+                    <button id="pauseBtn" title="Pause">⏸</button>
+                    <button id="stopBtn" title="Stop">⏹</button>
+                    <button id="rewindBtn" title="Rewind 5s">⏪</button>
+                    <button id="forwardBtn" title="Forward 5s">⏩</button>
+                    
+                    <select id="speedControl" title="Playback Speed">
+                        <option value="0.5">0.5x</option>
+                        <option value="1" selected>1.0x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2.0x</option>
+                    </select>
+
+                    <button id="muteBtn" title="Mute/Unmute">🔊</button>
+                    <input type="range" id="volumeSlider" class="vol-slider" min="0" max="1" step="0.05" value="1" title="Volume">
+                </div>
+                
+                <div class="time-display" id="timeDisplay">00:00 / 00:00</div>
             </div>
         </div>
     </div>
 
-    <!-- Hidden Input for Uploading Video -->
-    <input type="file" id="file-upload" accept="video/*" onchange="loadVideo(event)">
-
-    <!-- Screen Area -->
-    <div class="video-display">
-        <video id="main-video" src=""></video>
-    </div>
-
-    <!-- Timeline Slider -->
-    <div class="trackbar-container">
-        <input type="range" id="seek-bar" class="trackbar" value="0" min="0" step="0.1">
-    </div>
-
-    <!-- Control Buttons and Status -->
-    <div class="control-panel">
-        <div class="button-group">
-            <button class="win-btn" onclick="playVideo()" title="Play">▶</button>
-            <button class="win-btn" onclick="pauseVideo()" title="Pause">❚❚</button>
-            <button class="win-btn" onclick="stopVideo()" title="Stop">■</button>
-            <button class="win-btn" onclick="rewindVideo()" title="Rewind">◀◀</button>
-            <button class="win-btn" onclick="forwardVideo()" title="Fast Forward">▶▶</button>
-            <button class="win-btn" id="mute-btn" onclick="toggleMute()" title="Mute">🔊</button>
-        </div>
+    <script>
+        const fileMenuBtn = document.getElementById('fileMenuBtn');
+        const fileInput = document.getElementById('fileInput');
+        const mediaPlayer = document.getElementById('mediaPlayer');
+        const audioMessage = document.getElementById('audioMessage');
+        const progressBar = document.getElementById('progressBar');
+        const timeDisplay = document.getElementById('timeDisplay');
         
-        <!-- Time Status Tracker -->
-        <div class="status-display" id="time-display">00:00 / 00:00</div>
-    </div>
-</div>
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const rewindBtn = document.getElementById('rewindBtn');
+        const forwardBtn = document.getElementById('forwardBtn');
+        
+        const speedControl = document.getElementById('speedControl');
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
 
-<script>
-    const video = document.getElementById('main-video');
-    const seekBar = document.getElementById('seek-bar');
-    const timeDisplay = document.getElementById('time-display');
-    const muteBtn = document.getElementById('mute-btn');
+        // 1. File Upload Logic
+        fileMenuBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
 
-    function triggerUpload() {
-        document.getElementById('file-upload').click();
-    }
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    function loadVideo(event) {
-        const file = event.target.files;
-        if (file) {
-            const fileURL = URL.createObjectURL(file);
-            video.src = fileURL;
-            video.load();
-            video.play();
+            const objectURL = URL.createObjectURL(file);
+            mediaPlayer.src = objectURL;
+
+            // Check if it's an audio file
+            if (file.type.startsWith('audio/')) {
+                audioMessage.style.display = 'block';
+            } else {
+                audioMessage.style.display = 'none';
+            }
+
+            // Reset UI states for new file
+            mediaPlayer.playbackRate = parseFloat(speedControl.value);
+            mediaPlayer.volume = volumeSlider.value;
+            mediaPlayer.play();
+        });
+
+        // 2. Playback Controls
+        playBtn.addEventListener('click', () => mediaPlayer.play());
+        pauseBtn.addEventListener('click', () => mediaPlayer.pause());
+        
+        stopBtn.addEventListener('click', () => {
+            mediaPlayer.pause();
+            mediaPlayer.currentTime = 0;
+        });
+
+        rewindBtn.addEventListener('click', () => {
+            mediaPlayer.currentTime = Math.max(0, mediaPlayer.currentTime - 5);
+        });
+
+        forwardBtn.addEventListener('click', () => {
+            mediaPlayer.currentTime = Math.min(mediaPlayer.duration, mediaPlayer.currentTime + 5);
+        });
+
+        // 3. Speed & Volume Controls
+        speedControl.addEventListener('change', (e) => {
+            mediaPlayer.playbackRate = parseFloat(e.target.value);
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            mediaPlayer.volume = e.target.value;
+            if (mediaPlayer.volume > 0) {
+                mediaPlayer.muted = false;
+                muteBtn.style.color = '#000000';
+            }
+        });
+
+        muteBtn.addEventListener('click', () => {
+            mediaPlayer.muted = !mediaPlayer.muted;
+            if (mediaPlayer.muted) {
+                muteBtn.style.color = '#808080';
+                volumeSlider.value = 0;
+            } else {
+                muteBtn.style.color = '#000000';
+                // Restore volume to a default if it was at 0
+                if (mediaPlayer.volume === 0) mediaPlayer.volume = 1;
+                volumeSlider.value = mediaPlayer.volume;
+            }
+        });
+
+        // 4. Time Formatting & Progress Updates
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "00:00";
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
         }
-    }
 
-    // Exit function to handle link redirect
-    function exitPlayer() {
-        window.location.href = "exit.html";
-    }
+        mediaPlayer.addEventListener('loadedmetadata', () => {
+            progressBar.max = mediaPlayer.duration;
+            updateTimeDisplay();
+        });
 
-    function playVideo() {
-        if(video.src) video.play();
-    }
+        mediaPlayer.addEventListener('timeupdate', () => {
+            if (!progressBar.matches(':active')) {
+                progressBar.value = mediaPlayer.currentTime;
+            }
+            updateTimeDisplay();
+        });
 
-    function pauseVideo() {
-        video.pause();
-    }
-
-    function stopVideo() {
-        video.pause();
-        video.currentTime = 0;
-    }
-
-    function rewindVideo() {
-        video.currentTime = Math.max(0, video.currentTime - 5);
-    }
-
-    function forwardVideo() {
-        video.currentTime = Math.min(video.duration, video.currentTime + 5);
-    }
-
-    function toggleMute() {
-        video.muted = !video.muted;
-        muteBtn.innerText = video.muted ? "🔇" : "🔊";
-    }
-
-    video.addEventListener('timeupdate', () => {
-        if (!isNaN(video.duration)) {
-            seekBar.value = video.currentTime;
-            seekBar.max = video.duration;
-            
-            let curMins = Math.floor(video.currentTime / 60).toString().padStart(2, '0');
-            let curSecs = Math.floor(video.currentTime % 60).toString().padStart(2, '0');
-            let durMins = Math.floor(video.duration / 60).toString().padStart(2, '0');
-            let durSecs = Math.floor(video.duration % 60).toString().padStart(2, '0');
-            
-            timeDisplay.innerText = `${curMins}:${curSecs} / ${durMins}:${durSecs}`;
+        function updateTimeDisplay() {
+            const current = formatTime(mediaPlayer.currentTime);
+            const total = formatTime(mediaPlayer.duration);
+            timeDisplay.textContent = `${current} / ${total}`;
         }
-    });
 
-    seekBar.addEventListener('input', () => {
-        video.currentTime = seekBar.value;
-    });
-</script>
-
+        // 5. Seek Bar Interaction
+        progressBar.addEventListener('input', () => {
+            mediaPlayer.currentTime = progressBar.value;
+        });
+    </script>
 </body>
 </html>
