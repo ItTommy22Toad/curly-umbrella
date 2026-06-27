@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Windows 98 Media Player</title>
+    <style>
+        /* Transparent body background and flex centering */
+        body {
+            background-color: transparent; 
+            font-family: "MS Sans Serif", Arial, sans-serif;
+            font-size: 11px;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Resizable Main Window Container */
+        .player-window {
+            width: 100%;
+            max-width: 600px;
+            min-width: 320px;
+            background-color: #d4d0c8;
+            border-top: 2px solid #fff;
+            border-left: 2px solid #fff;
+            border-right: 2px solid #404040;
+            border-bottom: 2px solid #404040;
+            box-shadow: 1px 1px 0px 0px #000;
+            padding: 2px;
+            box-sizing: border-box;
+            resize: both;
+            overflow: auto; 
+        }
+
+        /* Menu Bar ([File], etc.) */
+        .menu-bar {
+            display: flex;
+            gap: 10px;
+            padding: 4px 6px;
+            font-size: 11px;
+        }
+        .menu-item {
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }
+        .menu-item::first-letter {
+            text-decoration: underline;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 15px;
+            left: 0;
+            background-color: #d4d0c8;
+            border: 1px solid #404040;
+            box-shadow: 2px 2px 0px #000;
+            z-index: 10;
+            min-width: 100px;
+        }
+        .menu-item:hover .dropdown {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 4px 10px;
+        }
+        .dropdown-item:hover {
+            background-color: #000080;
+            color: #fff;
+        }
+        
+        /* Subtle divider line for menu options */
+        .dropdown-divider {
+            height: 1px;
+            background-color: #808080;
+            border-bottom: 1px solid #fff;
+            margin: 4px 2px;
+        }
+
+        /* Video Display Box adapts to window size */
+        .video-display {
+            background-color: #000;
+            width: 100%;
+            height: 300px;
+            border-top: 2px solid #404040;
+            border-left: 2px solid #404040;
+            border-right: 2px solid #fff;
+            border-bottom: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: #000;
+        }
+
+        /* Trackbar/Slider Section */
+        .trackbar-container {
+            padding: 8px 6px;
+        }
+        .trackbar {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            margin: 0;
+        }
+        .trackbar:focus {
+            outline: none;
+        }
+        .trackbar::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #808080;
+            border-bottom: 1px solid #fff;
+            border-right: 1px solid #fff;
+        }
+        .trackbar::-webkit-slider-thumb {
+            height: 18px;
+            width: 10px;
+            background: #d4d0c8;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-right: 1px solid #404040;
+            border-bottom: 1px solid #404040;
+            box-shadow: 1px 1px 0 #000;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -7px;
+        }
+
+        /* Lower Control Panel */
+        .control-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 6px 8px 6px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 2px;
+        }
+
+        /* Classic Win98 Button Style */
+        .win-btn {
+            font-family: "MS Sans Serif", Arial, sans-serif;
+            font-size: 11px;
+            background-color: #d4d0c8;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-right: 1px solid #404040;
+            border-bottom: 1px solid #404040;
+            box-shadow: 1px 1px 0px 0px #000;
+            padding: 4px 6px;
+            cursor: pointer;
+            min-width: 28px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        .win-btn:active {
+            border-top: 1px solid #404040;
+            border-left: 1px solid #404040;
+            border-right: 1px solid #fff;
+            border-bottom: 1px solid #fff;
+            box-shadow: none;
+            padding: 5px 5px 3px 7px;
+        }
+
+        /* Information / Time Display Box */
+        .status-display {
+            background-color: #d4d0c8;
+            border-top: 1px solid #404040;
+            border-left: 1px solid #404040;
+            border-right: 1px solid #fff;
+            border-bottom: 1px solid #fff;
+            padding: 3px 6px;
+            min-width: 100px;
+            text-align: right;
+            font-family: monospace;
+            font-size: 11px;
+        }
+
+        #file-upload {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="player-window">
+    <!-- Menu Bar -->
+    <div class="menu-bar">
+        <div class="menu-item">
+            File
+            <div class="dropdown">
+                <div class="dropdown-item" onclick="triggerUpload()">Open File...</div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item" onclick="exitPlayer()">Exit</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Input for Uploading Video -->
+    <input type="file" id="file-upload" accept="video/*" onchange="loadVideo(event)">
+
+    <!-- Screen Area -->
+    <div class="video-display">
+        <video id="main-video" src=""></video>
+    </div>
+
+    <!-- Timeline Slider -->
+    <div class="trackbar-container">
+        <input type="range" id="seek-bar" class="trackbar" value="0" min="0" step="0.1">
+    </div>
+
+    <!-- Control Buttons and Status -->
+    <div class="control-panel">
+        <div class="button-group">
+            <button class="win-btn" onclick="playVideo()" title="Play">▶</button>
+            <button class="win-btn" onclick="pauseVideo()" title="Pause">❚❚</button>
+            <button class="win-btn" onclick="stopVideo()" title="Stop">■</button>
+            <button class="win-btn" onclick="rewindVideo()" title="Rewind">◀◀</button>
+            <button class="win-btn" onclick="forwardVideo()" title="Fast Forward">▶▶</button>
+            <button class="win-btn" id="mute-btn" onclick="toggleMute()" title="Mute">🔊</button>
+        </div>
+        
+        <!-- Time Status Tracker -->
+        <div class="status-display" id="time-display">00:00 / 00:00</div>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('main-video');
+    const seekBar = document.getElementById('seek-bar');
+    const timeDisplay = document.getElementById('time-display');
+    const muteBtn = document.getElementById('mute-btn');
+
+    function triggerUpload() {
+        document.getElementById('file-upload').click();
+    }
+
+    function loadVideo(event) {
+        const file = event.target.files;
+        if (file) {
+            const fileURL = URL.createObjectURL(file);
+            video.src = fileURL;
+            video.load();
+            video.play();
+        }
+    }
+
+    // Exit function to handle link redirect
+    function exitPlayer() {
+        window.location.href = "exit.html";
+    }
+
+    function playVideo() {
+        if(video.src) video.play();
+    }
+
+    function pauseVideo() {
+        video.pause();
+    }
+
+    function stopVideo() {
+        video.pause();
+        video.currentTime = 0;
+    }
+
+    function rewindVideo() {
+        video.currentTime = Math.max(0, video.currentTime - 5);
+    }
+
+    function forwardVideo() {
+        video.currentTime = Math.min(video.duration, video.currentTime + 5);
+    }
+
+    function toggleMute() {
+        video.muted = !video.muted;
+        muteBtn.innerText = video.muted ? "🔇" : "🔊";
+    }
+
+    video.addEventListener('timeupdate', () => {
+        if (!isNaN(video.duration)) {
+            seekBar.value = video.currentTime;
+            seekBar.max = video.duration;
+            
+            let curMins = Math.floor(video.currentTime / 60).toString().padStart(2, '0');
+            let curSecs = Math.floor(video.currentTime % 60).toString().padStart(2, '0');
+            let durMins = Math.floor(video.duration / 60).toString().padStart(2, '0');
+            let durSecs = Math.floor(video.duration % 60).toString().padStart(2, '0');
+            
+            timeDisplay.innerText = `${curMins}:${curSecs} / ${durMins}:${durSecs}`;
+        }
+    });
+
+    seekBar.addEventListener('input', () => {
+        video.currentTime = seekBar.value;
+    });
+</script>
+
+</body>
+</html>
