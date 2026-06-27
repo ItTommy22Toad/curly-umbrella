@@ -1,97 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Notepad</title>
 
 <style>
-body{
-    margin:0;
-    background:#c0c0c0;
-    font-family:Tahoma,Arial,sans-serif;
-    overflow:hidden;
+body {
+    margin: 0;
+    background: #c0c0c0;
+    font-family: Tahoma, Arial, sans-serif;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Fills screen height perfectly */
 }
 
-.menuBar{
-    background:#c0c0c0;
-    border-bottom:2px solid #808080;
-    display:flex;
-    padding:2px;
-    user-select:none;
+.menuBar {
+    background: #c0c0c0;
+    border-bottom: 2px solid #808080;
+    display: flex;
+    padding: 2px;
+    user-select: none;
+    z-index: 10;
 }
 
-.menu{
-    position:relative;
-    padding:4px 10px;
-    cursor:pointer;
+.menu {
+    position: relative;
+    padding: 4px 10px;
+    cursor: default;
 }
 
-.menu:hover{
-    background:#000080;
-    color:white;
+.menu:hover {
+    background: #000080;
+    color: white;
 }
 
-.dropdown{
-    display:none;
-    position:absolute;
-    top:100%;
-    left:0;
-    background:#c0c0c0;
-    border:2px solid white;
-    border-right-color:#404040;
-    border-bottom-color:#404040;
-    min-width:170px;
-    z-index:100;
+.dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #c0c0c0;
+    border: 2px solid white;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    min-width: 170px;
+    z-index: 100;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
 }
 
-.dropdown div{
-    padding:6px 10px;
-    cursor:pointer;
-    color:black;
+.dropdown div {
+    padding: 6px 10px;
+    cursor: pointer;
+    color: black;
 }
 
-.dropdown div:hover{
-    background:#000080;
-    color:white;
+.dropdown div:hover {
+    background: #000080;
+    color: white;
 }
 
-.menu:hover .dropdown{
-    display:block;
+.menu:hover .dropdown {
+    display: block;
 }
 
-#title{
-    padding:6px;
-    background:#d4d0c8;
-    font-size:13px;
-    border-bottom:1px solid gray;
+#title {
+    padding: 6px;
+    background: #d4d0c8;
+    font-size: 13px;
+    border-bottom: 1px solid gray;
+    flex-shrink: 0; /* Prevents title from squishing */
 }
 
-textarea{
-    width:100%;
-    height:calc(100vh - 72px);
-    resize:none;
-    border:none;
-    outline:none;
-    padding:10px;
-    box-sizing:border-box;
-    font-family:Consolas,monospace;
-    font-size:15px;
-    background:white;
+textarea {
+    flex-grow: 1; /* Takes up all remaining vertical space */
+    width: 100%;
+    resize: none;
+    border: none;
+    outline: none;
+    padding: 10px;
+    box-sizing: border-box;
+    font-family: Consolas, monospace;
+    font-size: 15px;
+    background: white;
+    white-space: pre; /* Default: no wrap, like classic Notepad */
+    overflow: auto;
 }
 
-.status{
-    height:24px;
-    background:#d4d0c8;
-    border-top:2px solid white;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 8px;
-    font-size:12px;
+/* Class applied when Word Wrap is toggled ON */
+.wrap-enabled {
+    white-space: pre-wrap !important; 
 }
 
-input[type=file]{
-    display:none;
+.status {
+    height: 24px;
+    background: #d4d0c8;
+    border-top: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+input[type=file] {
+    display: none;
 }
 </style>
 
@@ -99,149 +114,182 @@ input[type=file]{
 <body>
 
 <div class="menuBar">
+    <div class="menu">File
+        <div class="dropdown">
+            <div onclick="newFile()">New</div>
+            <div onclick="saveDoc()">Save</div>
+            <div onclick="upload.click()">Upload</div>
+            <div onclick="downloadDoc()">Download</div>
+            <div onclick="renameDoc()">Rename</div>
+        </div>
+    </div>
+    
+    <div class="menu">Edit
+        <div class="dropdown">
+            <div onclick="document.execCommand('undo')">Undo</div>
+            <div onclick="document.execCommand('redo')">Redo</div>
+            <div onclick="editor.select()">Select All</div>
+            <div onclick="clearText()">Clear Text</div>
+        </div>
+    </div>
 
-<div class="menu">
-File
-<div class="dropdown">
-<div onclick="saveDoc()">Save</div>
-<div onclick="upload.click()">Upload</div>
-<div onclick="downloadDoc()">Download</div>
-<div onclick="renameDoc()">Rename</div>
-<div onclick="location.href='exit.html'">Exit</div>
-</div>
-</div>
-
-<div class="menu">
-Edit
-<div class="dropdown">
-<div onclick="document.execCommand('undo')">Undo</div>
-<div onclick="document.execCommand('redo')">Redo</div>
-<div onclick="editor.select()">Select All</div>
-<div onclick="clearText()">Clear Text</div>
-</div>
-</div>
-
+    <div class="menu">Format
+        <div class="dropdown">
+            <div onclick="toggleWordWrap()" id="wrapToggle">Word Wrap: OFF</div>
+            <div onclick="changeFontSize(1)">Increase Font</div>
+            <div onclick="changeFontSize(-1)">Decrease Font</div>
+        </div>
+    </div>
 </div>
 
 <div id="title">Untitled.txt</div>
 
-<textarea id="editor"></textarea>
+<textarea id="editor" spellcheck="false"></textarea>
 
 <div class="status">
-<span id="status">Ready</span>
-<span id="counter">0 chars | 0 words</span>
+    <span id="status">Ready</span>
+    <span id="counter">0 chars | 0 words</span>
 </div>
 
 <input type="file" id="upload" accept=".txt">
 
 <script>
+    const editor = document.getElementById("editor");
+    const title = document.getElementById("title");
+    const status = document.getElementById("status");
+    const counter = document.getElementById("counter");
+    const upload = document.getElementById("upload");
+    const wrapToggle = document.getElementById("wrapToggle");
 
-const editor=document.getElementById("editor");
-const title=document.getElementById("title");
-const status=document.getElementById("status");
-const counter=document.getElementById("counter");
-const upload=document.getElementById("upload");
+    // Load states from local storage
+    let filename = localStorage.getItem("filename") || "Untitled.txt";
+    let isWrapped = localStorage.getItem("isWrapped") === "true";
+    let currentFontSize = parseInt(localStorage.getItem("fontSize")) || 15;
 
-let filename=localStorage.getItem("filename")||"Untitled.txt";
-title.innerText=filename;
+    // Initialization
+    title.innerText = filename;
+    editor.value = localStorage.getItem("text") || "";
+    editor.style.fontSize = currentFontSize + "px";
+    
+    if (isWrapped) {
+        editor.classList.add("wrap-enabled");
+        wrapToggle.innerText = "Word Wrap: ON";
+    }
 
-editor.value=localStorage.getItem("text")||"";
+    updateCounter();
 
-updateCounter();
+    // Auto-save logic (debounced to prevent status bar flickering)
+    let autoSaveTimeout;
+    editor.addEventListener("input", () => {
+        updateCounter();
+        status.innerText = "Editing...";
+        
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            saveDoc(true);
+        }, 1000); // Saves 1 second after the user stops typing
+    });
 
-function saveDoc(){
-    localStorage.setItem("text",editor.value);
-    localStorage.setItem("filename",filename);
+    function newFile() {
+        if (confirm("Create a new file? Unsaved changes will be lost.")) {
+            editor.value = "";
+            filename = "Untitled.txt";
+            title.innerText = filename;
+            saveDoc();
+            updateCounter();
+        }
+    }
 
-    status.innerText="Saved";
+    function saveDoc(isAuto = false) {
+        localStorage.setItem("text", editor.value);
+        localStorage.setItem("filename", filename);
+        localStorage.setItem("isWrapped", isWrapped);
+        localStorage.setItem("fontSize", currentFontSize);
 
-    setTimeout(()=>{
-        status.innerText="Ready";
-    },1000);
-}
+        status.innerText = isAuto ? "Auto-saved" : "Saved";
+        
+        // Reset status message after a brief moment
+        setTimeout(() => {
+            if (status.innerText === "Auto-saved" || status.innerText === "Saved") {
+                status.innerText = "Ready";
+            }
+        }, 2000);
+    }
 
-function downloadDoc(){
+    function downloadDoc() {
+        let blob = new Blob([editor.value], { type: "text/plain" });
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
 
-    let blob=new Blob([editor.value],{type:"text/plain"});
-    let a=document.createElement("a");
+    upload.onchange = e => {
+        let file = e.target.files[0];
+        if (!file) return;
 
-    a.href=URL.createObjectURL(blob);
-    a.download=filename;
+        filename = file.name;
+        title.innerText = filename;
 
-    a.click();
+        let reader = new FileReader();
+        reader.onload = function(ev) {
+            editor.value = ev.target.result;
+            saveDoc();
+            updateCounter();
+        };
+        reader.readAsText(file);
+        
+        // Reset the input so uploading the same file again triggers change event
+        upload.value = '';
+    }
 
-    URL.revokeObjectURL(a.href);
+    function renameDoc() {
+        let name = prompt("Document name:", filename);
+        if (name) {
+            // Ensure it has a .txt extension visually
+            if (!name.toLowerCase().endsWith('.txt')) name += '.txt';
+            filename = name;
+            title.innerText = name;
+            saveDoc();
+        }
+    }
 
-}
+    function clearText() {
+        if (confirm("Clear all text?")) {
+            editor.value = "";
+            saveDoc();
+            updateCounter();
+            editor.focus();
+        }
+    }
 
-upload.onchange=e=>{
+    function toggleWordWrap() {
+        isWrapped = !isWrapped;
+        if (isWrapped) {
+            editor.classList.add("wrap-enabled");
+            wrapToggle.innerText = "Word Wrap: ON";
+        } else {
+            editor.classList.remove("wrap-enabled");
+            wrapToggle.innerText = "Word Wrap: OFF";
+        }
+        saveDoc();
+    }
 
-let file=e.target.files[0];
-if(!file) return;
+    function changeFontSize(change) {
+        currentFontSize += (change * 2);
+        if (currentFontSize < 8) currentFontSize = 8;
+        if (currentFontSize > 72) currentFontSize = 72;
+        editor.style.fontSize = currentFontSize + "px";
+        saveDoc();
+    }
 
-filename=file.name;
-title.innerText=filename;
-
-let reader=new FileReader();
-
-reader.onload=function(ev){
-
-editor.value=ev.target.result;
-saveDoc();
-updateCounter();
-
-};
-
-reader.readAsText(file);
-
-}
-
-function renameDoc(){
-
-let name=prompt("Document name:",filename);
-
-if(name){
-
-filename=name;
-title.innerText=name;
-saveDoc();
-
-}
-
-}
-
-function clearText(){
-
-if(confirm("Clear all text?")){
-
-editor.value="";
-saveDoc();
-updateCounter();
-
-}
-
-}
-
-editor.addEventListener("input",()=>{
-
-updateCounter();
-
-});
-
-function updateCounter(){
-
-let chars=editor.value.length;
-
-let words=editor.value.trim()==""?0:editor.value.trim().split(/\s+/).length;
-
-counter.innerText=chars+" chars | "+words+" words";
-
-}
-
-// Autosave every second
-
-setInterval(saveDoc,1000);
-
+    function updateCounter() {
+        let chars = editor.value.length;
+        // Accurate word count logic
+        let words = editor.value.trim() === "" ? 0 : editor.value.trim().split(/\s+/).length;
+        counter.innerText = chars + " chars | " + words + " words";
+    }
 </script>
 
 </body>
